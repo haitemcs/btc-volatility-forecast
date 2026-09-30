@@ -1,6 +1,79 @@
 # BTC Volatility Forecasting
 
-Machine learning experiments for forecasting the **Bitcoin hourly volatility ratio**, with a focus on model evaluation, tail-risk behavior, and out-of-sample performance.
+> *The object is not to make the market obedient to the model, but to discover the structure that remains when the noise is removed.*
+
+This project studies a simple question: **how much of the next hour's volatility is determined by the information already present in the market?**
+
+The work is deliberately experimental. Models are treated as mathematical objects to be compared, broken, and understood—not merely as sources of a single score.
+
+## Mathematical Formulation
+
+Let the hourly OHLCV observation at time $t$ be
+
+$
+X_t = (O_t,H_t,L_t,C_t,V_t).
+$
+
+The hourly range is defined by
+
+$
+R_t = 100\frac{H_t-L_t}{L_t}.
+$
+
+The close-to-close return is
+
+$
+r_t = 100\frac{C_t-C_{t-1}}{C_{t-1}}.
+$
+
+For a window of $k$ hours, a volatility estimate is
+
+$
+\sigma_t^{(k)}
+=
+\sqrt{\frac{1}{k-1}
+\sum_{i=0}^{k-1}(r_{t-i}-\bar r_t)^2}.
+$
+
+The forecasting problem is then written as
+
+$
+y_{t+1}=f(X_t,X_{t-1},\ldots,X_{t-p}),
+$
+
+where $y_{t+1}$ is the future volatility ratio and $f$ is the learned function.
+
+For Ridge regression,
+
+$
+\hat\beta
+=
+\arg\min_\beta
+\left[
+\sum_{i=1}^{n}(y_i-x_i^T\beta)^2
++
+\lambda\|\beta\|_2^2
+\right].
+$
+
+The neural network learns a nonlinear map
+
+$
+\hat y=f_\theta(x),
+$
+
+by minimizing the empirical loss
+
+$
+\mathcal L(\theta)
+=
+\frac{1}{n}\sum_{i=1}^{n}
+(y_i-f_\theta(x_i))^2.
+$
+
+This last equation is important: under ordinary MSE, the model is driven toward the conditional mean. When violent volatility is rare, the geometry of the objective itself can favor the ordinary regime over the exceptional one.
+
+The project therefore asks not only **which model predicts better**, but **what mathematical structure causes the failures**.
 
 ## Model Evaluation & Results
 
@@ -140,10 +213,28 @@ The current progression is:
 
 ## Repository Structure
 
-- 'mytesting.ipynb' — model experiments, preprocessing, training, evaluation, and visualizations
-- 'btc_data.csv' — BTC market data used in the experiments
+- `Volatility Forecasting.ipynb` — complete data collection, feature construction, model training, evaluation, and visual analysis.
+- No static `btc_data.csv` is required; the notebook retrieves the market data directly from Binance.
+
+## Experimental Philosophy
+
+The progression of the project is intentionally close to a mathematical investigation:
+
+1. Define the quantity.
+2. Construct the observable variables.
+3. Build simple models.
+4. Measure their errors.
+5. Examine where the errors concentrate.
+6. Explain the failure from the model's structure.
+7. Modify the objective.
+8. Test whether the modification changes the phenomenon.
+
+A numerical result is only the beginning. The more interesting object is the **reason for the result**.
+
+In that sense, the project is less concerned with declaring a champion than with finding the invariants of the problem: which behaviors survive a change of model, which disappear, and which arise from the assumptions imposed by the learner itself.
 
 ## Status
+
 
 **Current stage:** Baseline model evaluation and failure analysis.
 
