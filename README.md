@@ -1,76 +1,84 @@
-# BTC Volatility Forecasting
+# BTC Volatility Forecast
 
-Machine learning project for predicting the next-hour BTC volatility ratio.
+Machine learning project for predicting the next-hour BTC volatility ratio from historical market data and engineered features.
 
-## Models
+## Stack
 
-Neural Network  
-Ridge Regression  
-XGBoost
+- Python
+- pandas / NumPy
+- scikit-learn
+- XGBoost
+- Jupyter
+- FastAPI
+- PostgreSQL
+- Docker
 
 ## Target
 
-The target is the next-hour volatility ratio.
+Hourly volatility ratio:
 
-Hourly range:
+    R_t = (High_t - Low_t) / Low_t
 
-R_t = (High_t - Low_t) / Low_t
+The model uses information available before the prediction horizon to estimate the next-hour volatility.
 
-The model uses historical market information and engineered features to estimate future volatility.
+## Pipeline
 
-## Results
+    Market Data
+        ↓
+    Cleaning
+        ↓
+    Feature Engineering
+        ↓
+    Time-Series Validation
+        ↓
+    Model Training
+        ↓
+    Evaluation
+        ↓
+    FastAPI
+        ↓
+    PostgreSQL
+        ↓
+    Docker
 
-The models perform reasonably in normal volatility conditions.
+## Features
 
-During high-volatility periods, actual values can reach around 3–4 while predictions often remain around 1.5–2.
+The project evolved from basic OHLCV features to a larger feature set including:
 
-Neural Network: more variation and higher predictions, but less stable.
+- OHLCV
+- rolling and lagged features
+- order-flow features
+- funding information
+- time-based features
 
-Ridge: smoother and more conservative predictions.
+## Models
 
-XGBoost: good in the normal range, but tends to underestimate extreme volatility.
+Experiments include:
 
-## Why?
-
-MSE:
-
-MSE = (1/n) Σ(y_i - ŷ_i)²
-
-Extreme volatility events are rare, so normal observations dominate the loss.
-
-The target is also imbalanced across volatility regimes. There are many normal periods and relatively few extreme events.
-
-XGBoost and other tree models also do not naturally extrapolate far beyond the target values represented in their training data.
-
-## Next Experiments
-
-Log-transform the target.
-
-Weighted loss for high-volatility observations.
-
-Quantile regression.
-
-Walk-forward validation.
-
-Tail-specific evaluation.
+- Ridge Regression
+- Random Forest / tree-based models
+- XGBoost
+- Neural Network
+- HistGradientBoosting
 
 ## Evaluation
 
-MAE  
-MSE  
-RMSE  
-R²
+- MAE
+- RMSE
+- R²
 
-The project also evaluates model behavior specifically during high-volatility periods.
+Model behavior is also evaluated during high-volatility periods rather than relying only on average metrics.
 
-## Repository
+## Important ML lessons
 
-Volatility Forecasting.ipynb contains the data collection, feature engineering, model training, evaluation, and plots.
+Financial time series require chronological validation. Random train/test splitting can introduce future information into training and produce misleading results.
 
-Market data is collected directly in the notebook.
+Another finding was that models can perform reasonably in normal volatility but underestimate extreme movements.
+
+## Engineering
+
+The trained model is exposed through a FastAPI service and packaged with Docker alongside PostgreSQL.
 
 ## Status
 
-Baseline models and failure analysis completed.
-
-Next: tail-aware volatility forecasting.
+Baseline forecasting pipeline completed. Current focus is improving tail/high-volatility prediction and making the model pipeline more robust.
