@@ -1,84 +1,62 @@
-# BTC Volatility Forecast
+# Bitcoin Volatility Forecasting
 
-Machine learning project for predicting the next-hour BTC volatility ratio from historical market data and engineered features.
+A notebook-based machine-learning project exploring whether historical Bitcoin market data and engineered features can help estimate short-horizon volatility. The current repository contains the forecasting notebook; it should not be mistaken for a deployed API service.
 
-## Stack
+## Data
 
-- Python
-- pandas / NumPy
-- scikit-learn
-- XGBoost
-- Jupyter
-- FastAPI
-- PostgreSQL
-- Docker
+The notebook downloads hourly BTC/USDT candlestick data from the Binance public market-data API. The saved notebook output records 79,789 hourly rows, spanning from August 2017 through September 2026 in that run. Data availability can change, so rerunning the notebook may produce a different dataset.
+
+The candlestick data includes open, high, low, close, volume, and related exchange fields.
 
 ## Target
 
-Hourly volatility ratio:
+The notebook investigates an hourly range-based volatility measure:
 
-    R_t = (High_t - Low_t) / Low_t
+```text
+range_t = (high_t - low_t) / low_t
+```
 
-The model uses information available before the prediction horizon to estimate the next-hour volatility.
+For forecasting, features must be restricted to information available before the target hour. This makes chronological splitting and leakage checks important.
 
-## Pipeline
+## Workflow
 
-    Market Data
-        ↓
-    Cleaning
-        ↓
-    Feature Engineering
-        ↓
-    Time-Series Validation
-        ↓
-    Model Training
-        ↓
-    Evaluation
-        ↓
-    FastAPI
-        ↓
-    PostgreSQL
-        ↓
-    Docker
+1. Download hourly market data.
+2. Clean and prepare the time series.
+3. Create lagged and rolling features.
+4. Define the target and forecasting horizon.
+5. Train and compare candidate models.
+6. Evaluate predictions using appropriate regression metrics.
+7. Inspect failure cases, especially during sharp market moves.
 
-## Features
+## Tools
 
-The project evolved from basic OHLCV features to a larger feature set including:
+The notebook uses Python, pandas, NumPy, requests, Matplotlib, scikit-learn, and PyTorch.
 
-- OHLCV
-- rolling and lagged features
-- order-flow features
-- funding information
-- time-based features
+## Run the notebook
 
-## Models
+Requirements: Python and Jupyter Notebook or JupyterLab.
 
-Experiments include:
+```bash
+python -m venv .venv
+```
 
-- Ridge Regression
-- Random Forest / tree-based models
-- XGBoost
-- Neural Network
-- HistGradientBoosting
+Activate the virtual environment and install the libraries imported by the notebook. For example:
 
-## Evaluation
+```bash
+python -m pip install jupyter pandas numpy requests matplotlib scikit-learn torch
+jupyter notebook
+```
 
-- MAE
-- RMSE
-- R²
+Open [Volatility Forecasting.ipynb](Volatility%20Forecasting.ipynb) and run cells in order. The data-download cells make HTTP requests to Binance; access to that endpoint and its current availability are required to fetch fresh data.
 
-Model behavior is also evaluated during high-volatility periods rather than relying only on average metrics.
+## Evaluation notes
 
-## Important ML lessons
+For financial time series, use chronological train/validation/test periods rather than randomly mixing future and past observations. Compare against simple baselines, inspect MAE and RMSE alongside R², and analyze performance during high-volatility periods instead of relying only on aggregate scores.
 
-Financial time series require chronological validation. Random train/test splitting can introduce future information into training and produce misleading results.
+## Current scope
 
-Another finding was that models can perform reasonably in normal volatility but underestimate extreme movements.
+The tracked repository currently contains the notebook and README. A packaged inference service, API, database integration, Docker deployment, and automated CI are not included in the current tracked files.
 
-## Engineering
+## License
 
-The trained model is exposed through a FastAPI service and packaged with Docker alongside PostgreSQL.
-
-## Status
-
-Baseline forecasting pipeline completed. Current focus is improving tail/high-volatility prediction and making the model pipeline more robust.
+Distributed under the MIT License. See [LICENSE](LICENSE).
